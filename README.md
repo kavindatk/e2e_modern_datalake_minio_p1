@@ -1,5 +1,12 @@
 # Building a Modern Lakehouse: End-to-End Data Engineering with MinIO, Hive, PySpark, Trino & DuckDB
 <br/><br/>
+<p align="center">
+<picture>
+  <img alt="docker" src="https://github.com/kavindatk/e2e_modern_datalake_minio_p1/blob/main/images/final_setup.JPG" width="800" height="300">
+</picture>
+</p>
+<br/><br/>
+
 ## 🚀 Building a Complete End-to-End Data Engineering Pipeline
 <br/><br/>
 We’ve now built a <b>modern data lakehouse</b> that brings together several powerful open-source technologies.
