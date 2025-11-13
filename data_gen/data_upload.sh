@@ -18,7 +18,8 @@ echo "dateval = $dateval"
 echo "hourval = $hourval"
 
 # Uplaod file to MINIO S3 bucket
-mc cp $file_path myminio/cusdatabucket/$dateval/$hourval/
+mc cp $file_path myminio/cusdatabucket/customer_data/dateval=$dateval/hourval=$hourval/
+
 
 # Delete uploaded file
 
