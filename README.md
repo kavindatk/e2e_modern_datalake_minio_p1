@@ -2,13 +2,13 @@
 <br/><br/>
 ## 🚀 Building a Complete End-to-End Data Engineering Pipeline
 <br/><br/>
-We’ve now built a modern data lakehouse that brings together several powerful open-source technologies.
-Our architecture uses MinIO (S3-compatible object storage) as the foundation, with Hive Metastore managing metadata and Apache Iceberg providing an advanced table format.
+We’ve now built a <b>modern data lakehouse</b> that brings together several powerful open-source technologies.
+Our architecture uses <b>MinIO (S3-compatible object storage)</b> as the foundation, with <b>Hive Metastore</b> managing metadata and <b>Apache Iceberg</b> providing an advanced table format.
 <br/>
-Apache Spark powers large-scale data processing, while Hue offers an interactive GUI interface for Trino and Spark SQL, making SQL querying fast and intuitive.
-Finally, DuckDB delivers ultra-fast local analytics directly on top of the same data.
+<b>Apache Spark</b> powers large-scale data processing, while <b>Hue</b> offers an interactive GUI interface for <b>Trino</b> and <b>Spark SQL</b>, making SQL querying fast and intuitive.
+Finally, <b>DuckDB</b> delivers ultra-fast local analytics directly on top of the same data.
 <br/>
-Now, it’s time to implement a complete end-to-end data engineering pipeline using this setup.
+Now, it’s time to implement a <b>complete end-to-end data engineering pipeline</b> using this setup.
 <br/><br/>
 
 
@@ -17,7 +17,21 @@ Now, it’s time to implement a complete end-to-end data engineering pipeline us
 
 ### Task 01 — Data Generation:
 
-A source program generates customer transaction datasets every hour.
+A source program generates <b>customer transaction datasets every hour.</b>
+<br/>
+
+As I mentioned in the previous article, <b>we cannot use Hive directly through HUE</b> in this setup because we’ve modified the core architecture. Our focus here is only on the <b>Hive Metastore service.</b>
+<br/>
+
+During the <b>Data Generation</b> process, the data is uploaded to the <b>MinIO S3 bucket in a partitioned folder</b> structure (organized by date and hour).
+To make the data easier to view and manage, I’ll create a Hive table for these files using Beeline.
+<br/>
+
+For this step, I’ll log in to <b>VM1 (where Beeline is installed)</b>, create the Hive table, and load the data into the corresponding partitions.
+<br/>
+
+The data loading and table creation process is shown below.
+
 <br/><br/>
 ### Task 02 — Transformation & Compression:
 
