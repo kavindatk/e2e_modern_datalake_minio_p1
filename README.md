@@ -13,10 +13,10 @@ Now, it’s time to implement a <b>complete end-to-end data engineering pipeline
 
 
 ## 🔄 Workflow Summary
-<br/><br/>
+<br/>
 
 ### Task 01 — Data Generation:
-
+<br/>
 A source program generates <b>customer transaction datasets every hour.</b>
 <br/>
 
@@ -28,9 +28,11 @@ To make the data easier to view and manage, I’ll create a Hive table for these
 <br/>
 
 For this step, I’ll log in to <b>VM1 (where Beeline is installed)</b>, create the Hive table, and load the data into the corresponding partitions.
-<br/>
+<br/><br/>
 
 #### The data loading and table creation process is shown below.
+
+<br/>
 
 ```bash
 hadoop@node01:~$  docker exec -it hive_server2 beeline -u "jdbc:hive2:///"
