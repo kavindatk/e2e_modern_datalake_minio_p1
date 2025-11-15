@@ -214,6 +214,41 @@ No rows affected (0.036 seconds)
 
 Use Hue to run SQL queries through Trino for fast, interactive analytics.
 <br/><br/>
+
+Now it’s time to test the work we’ve done so far.
+The Spark job is running smoothly and successfully loading data into the <b>Iceberg table.</b>
+Next, we will run some queries to validate the data.
+
+For querying, my primary tool is <b>Trino</b>, which is already integrated with <b>HUE</b>. Using HUE, I can run interactive SQL queries directly on the Iceberg table.
+In addition to Trino queries, I will also show examples of executing the same queries using <b>Spark SQL</b>, so you can compare both approaches.
+
+Below are some sample queries executed using <b>Trino and Spark SQL.</b>
+<br/>
+
+#### Trino
+
+```sql
+#Trino  Catalog should be "iceberg"
+
+SELECT * FROM iceberg.my_db.customer_data;
+
+SELECT count(*) FROM iceberg.my_db.customer_data;
+```
+
+<br/><br/>
+
+#### Spark SQL
+
+```sql
+#Trino  Catalog should be "iceberg_catalog"
+
+SELECT * FROM iceberg_catalog.my_db.customer_data;
+
+SELECT count(*) FROM iceberg_catalog.my_db.customer_data;
+
+```
+
+<br/><br/>
 ### Task 04 — Loading Data into DuckDB:
 
 Load and query the same processed data directly from DuckDB for lightweight local analytics.
