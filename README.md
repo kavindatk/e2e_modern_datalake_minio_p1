@@ -252,3 +252,123 @@ SELECT count(*) FROM iceberg_catalog.my_db.customer_data;
 ### Task 04 — Loading Data into DuckDB:
 
 Load and query the same processed data directly from DuckDB for lightweight local analytics.
+<br/><br/>
+Finally, I will demonstrate how to read the processed Iceberg data using <b>DuckDB</b>, which operates as a separate component in our architecture.
+DuckDB is rapidly gaining popularity in the industry due to its ability to handle heavy analytical workloads with impressive, Spark-like performance — all while running locally with minimal setup.
+
+The following steps show how DuckDB connects to MinIO, reads the Iceberg/Parquet data, and performs fast analytical queries.
+<br/><br/>
+
+```xml
+# Persistent Database creating code
+
+.open /home/hadoop/duckdb_test/customer_data.db
+
+INSTALL httpfs;
+LOAD httpfs;
+
+-- MinIO S3 configuration
+SET s3_endpoint='minoproxy:9999';
+SET s3_access_key_id='minioadmin';
+SET s3_secret_access_key='minioadmin';
+SET s3_region='us-east-1';
+SET s3_url_style='path';
+SET s3_use_ssl=false;
+
+
+
+-- Create a view from the MINIO data files
+
+CREATE VIEW customer_data AS
+SELECT * FROM read_parquet('s3://warehouse/tablespace/external_tables/my_db.db/customer_data/data/dateval=*/*.parquet');
+
+
+.quit
+```
+
+<br/><br/>
+
+```bash
+# Create Duckdb persistent database
+
+hadoop@node01:~/duckdb_test$ duckdb
+DuckDB v1.4.1 (Andium) b390a7c376
+Enter ".help" for usage hints.
+Connected to a transient in-memory database.
+Use ".open FILENAME" to reopen on a persistent database.
+D
+D .open /home/hadoop/duckdb_test/customer_data.db
+D
+D INSTALL httpfs;
+D LOAD httpfs;
+D
+D -- MinIO S3 configuration
+D SET s3_endpoint='minoproxy:9999';
+D SET s3_access_key_id='minioadmin';
+D SET s3_secret_access_key='minioadmin';
+D SET s3_region='us-east-1';
+D SET s3_url_style='path';
+D SET s3_use_ssl=false;
+D
+D
+D
+D -- Create a view from the MINIO data files
+D
+D
+D CREATE VIEW customer_data AS
+  SELECT * FROM read_parquet('s3://warehouse/tablespace/external_tables/my_db.db/customer_data/data/dateval=*/*.parquet');
+D
+D .quit
+hadoop@node01:~/duckdb_test$
+```
+
+<br/><br/>
+
+```bash
+# Testing  DuckDb data
+
+hadoop@node01:~/duckdb_test$ ls
+customer_data.db  duck.txt  sparkdb.db
+hadoop@node01:~/duckdb_test$
+hadoop@node01:~/duckdb_test$ duckdb customer_data.db
+DuckDB v1.4.1 (Andium) b390a7c376
+Enter ".help" for usage hints.
+D show tables;
+┌───────────────┐
+│     name      │
+│    varchar    │
+├───────────────┤
+│ customer_data │
+└───────────────┘
+D select * from customer_data limit 10;
+┌─────────────────────┬──────────────────────┬──────────────────┬────────────┬───┬────────────────┬─────────────────────┬───────────────────┬────────────┐
+│        name         │       address        │       city       │  country   │ … │ purchase_units │ discount_percentage │ transction_amount │  dateval   │
+│       varchar       │       varchar        │     varchar      │  varchar   │   │     int32      │    decimal(5,2)     │   decimal(10,2)   │    date    │
+├─────────────────────┼──────────────────────┼──────────────────┼────────────┼───┼────────────────┼─────────────────────┼───────────────────┼────────────┤
+│ Denise Williams     │ 5915 Elliott Neck …  │ Bellton          │ Bahrain    │ … │             37 │               10.00 │             81.55 │ 2025-11-15 │
+│ Alyssa Burgess      │ 89760 Collins Vill…  │ West Michael     │ Kazakhstan │ … │             12 │               13.00 │             34.66 │ 2025-11-15 │
+│ Elizabeth Jones     │ 507 Joshua Ports S…  │ Lake Jessica     │ Gibraltar  │ … │             52 │                7.00 │             47.88 │ 2025-11-15 │
+│ Peter Jackson       │ 87063 Young Turnpi…  │ Samuelborough    │ Guyana     │ … │             25 │               16.00 │             92.37 │ 2025-11-15 │
+│ Joshua Hall         │ 6713 Jill Bridge, …  │ Natalieville     │ Djibouti   │ … │             65 │               16.00 │             10.73 │ 2025-11-15 │
+│ Christopher Stewart │ 1373 Wolf Avenue, …  │ Lake Jennifer    │ Italy      │ … │             26 │               24.00 │             42.15 │ 2025-11-15 │
+│ Nicole Carroll      │ 191 Angela Mountai…  │ Codymouth        │ Guernsey   │ … │             71 │               20.00 │             45.75 │ 2025-11-15 │
+│ Jacqueline Brooks   │ 7785 Jones Pass Ap…  │ Noahfort         │ Tajikistan │ … │             42 │               18.00 │             98.45 │ 2025-11-15 │
+│ Justin Dyer         │ 04089 Wyatt Mounta…  │ New Heatherville │ Belize     │ … │             55 │                3.00 │             79.62 │ 2025-11-15 │
+│ Christy Campbell    │ 49458 Edward Inlet…  │ Port Jonathan    │ Botswana   │ … │             45 │                7.00 │             53.56 │ 2025-11-15 │
+├─────────────────────┴──────────────────────┴──────────────────┴────────────┴───┴────────────────┴─────────────────────┴───────────────────┴────────────┤
+│ 10 rows                                                                                                                           12 columns (8 shown) │
+└────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+D
+D select count(*) from customer_data ;
+┌────────────────┐
+│  count_star()  │
+│     int64      │
+├────────────────┤
+│    1200000     │
+│ (1.20 million) │
+└────────────────┘
+D .quit
+hadoop@node01:~/duckdb_test$
+
+```
+
