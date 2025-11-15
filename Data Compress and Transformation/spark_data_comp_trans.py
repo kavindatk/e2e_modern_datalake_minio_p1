@@ -45,7 +45,7 @@ def data_saving_iceberg(df):
         .tableProperty("write.format.default", "parquet") \
         .tableProperty("write.parquet.compression-codec", "snappy") \
         .partitionedBy("dateval") \
-        .createOrReplace()
+        .append()
     
 
 def main():
@@ -85,3 +85,4 @@ if __name__ == "__main__" :
  
     main()
     
+
