@@ -126,6 +126,90 @@ No Stats for customer_info@customer_data, Columns: country, entry_time, address,
 
 Spark processes and compresses these files, then stores them as Iceberg tables in MinIO.
 <br/><br/>
+
+In this task, I will perform transformations on the data and save the results into an <b>Iceberg table</b> using <b>PySpark</b>. During this process, the data will be written in <b>Parquet</b> format with <b>Snappy compression.</b>
+For this job, I’m using <b>VM1</b>, which currently functions as the <b>Spark master node.</b> The transformation job runs as a cron job, where it reads <b>H-2 (two hours old)</b> data every hour and writes the transformed output to the MinIO bucket.
+
+Since my Spark cluster is also running in Docker containers, I use a <b>shell script</b> to automate the execution of the PySpark job. The script also writes logs, which can be used later for auditing and troubleshooting.
+Additionally, you can view each executed instance in the Spark Web UI within its respective time window.
+
+Both the PySpark code and the shell script are uploaded to the <b>Data Transformation folder</b> referenced above.
+<br/>
+
+```bash
+0: jdbc:hive2:///> use my_db;
+No rows affected (0.036 seconds)
+0: jdbc:hive2:///> show tables;
++----------------+
+|    tab_name    |
++----------------+
+| customer_data  |
++----------------+
+1 row selected (0.068 seconds)
+0: jdbc:hive2:///> describe formatted customer_data;
++-------------------------------+----------------------------------------------------+----------------------------------------------------+
+|           col_name            |                     data_type                      |                      comment                       |
++-------------------------------+----------------------------------------------------+----------------------------------------------------+
+| name                          | string                                             |                                                    |
+| address                       | string                                             |                                                    |
+| city                          | string                                             |                                                    |
+| country                       | string                                             |                                                    |
+| job                           | string                                             |                                                    |
+| passport_number               | string                                             |                                                    |
+| date_of_birth                 | date                                               |                                                    |
+| transction_date               | date                                               |                                                    |
+| purchase_units                | int                                                |                                                    |
+| discount_percentage           | decimal(5,2)                                       |                                                    |
+| transction_amount             | decimal(10,2)                                      |                                                    |
+| dateval                       | string                                             |                                                    |
+|                               | NULL                                               | NULL                                               |
+| # Detailed Table Information  | NULL                                               | NULL                                               |
+| Database:                     | my_db                                              | NULL                                               |
+| OwnerType:                    | USER                                               | NULL                                               |
+| Owner:                        | spark                                              | NULL                                               |
+| CreateTime:                   | Sat Nov 15 08:50:40 UTC 2025                       | NULL                                               |
+| LastAccessTime:               | Mon Dec 08 10:44:42 UTC 1969                       | NULL                                               |
+| Retention:                    | 2147483647                                         | NULL                                               |
+| Location:                     | s3a://warehouse/tablespace/external_tables/my_db.db/customer_data | NULL                                               |
+| Table Type:                   | EXTERNAL_TABLE                                     | NULL                                               |
+| Table Parameters:             | NULL                                               | NULL                                               |
+|                               | DO_NOT_UPDATE_STATS                                | true                                               |
+|                               | EXTERNAL                                           | TRUE                                               |
+|                               | current-schema                                     | {\"type\":\"struct\",\"schema-id\":0,\"fields\":[{\"id\":1,\"name\":\"name\",\"required\":false,\"type\":\"string\"},{\"id\":2,\"name\":\"address\",\"required\":false,\"type\":\"string\"},{\"id\":3,\"name\":\"city\",\"required\":false,\"type\":\"string\"},{\"id\":4,\"name\":\"country\",\"required\":false,\"type\":\"string\"},{\"id\":5,\"name\":\"job\",\"required\":false,\"type\":\"string\"},{\"id\":6,\"name\":\"passport_number\",\"required\":false,\"type\":\"string\"},{\"id\":7,\"name\":\"date_of_birth\",\"required\":false,\"type\":\"date\"},{\"id\":8,\"name\":\"transction_date\",\"required\":false,\"type\":\"date\"},{\"id\":9,\"name\":\"purchase_units\",\"required\":false,\"type\":\"int\"},{\"id\":10,\"name\":\"discount_percentage\",\"required\":false,\"type\":\"decimal(5, 2)\"},{\"id\":11,\"name\":\"transction_amount\",\"required\":false,\"type\":\"decimal(10, 2)\"},{\"id\":12,\"name\":\"dateval\",\"required\":false,\"type\":\"string\"}]} |
+|                               | current-snapshot-id                                | 2861418859086358860                                |
+|                               | current-snapshot-summary                           | {\"spark.app.id\":\"app-20251115161006-0024\",\"added-data-files\":\"1\",\"added-records\":\"600000\",\"added-files-size\":\"38728757\",\"changed-partition-count\":\"1\",\"total-records\":\"600000\",\"total-files-size\":\"38728757\",\"total-data-files\":\"1\",\"total-delete-files\":\"0\",\"total-position-deletes\":\"0\",\"total-equality-deletes\":\"0\",\"engine-version\":\"4.0.0\",\"app-id\":\"app-20251115161006-0024\",\"engine-name\":\"spark\",\"iceberg-version\":\"Apache Iceberg 1.10.0 (commit 2114bf631e49af532d66e2ce148ee49dd1dd1f1f)\"} |
+|                               | current-snapshot-timestamp-ms                      | 1763223043270                                      |
+|                               | default-partition-spec                             | {\"spec-id\":0,\"fields\":[{\"name\":\"dateval\",\"transform\":\"identity\",\"source-id\":12,\"field-id\":1000}]} |
+|                               | metadata_location                                  | s3a://warehouse/tablespace/external_tables/my_db.db/customer_data/metadata/00008-86f4b75b-2f70-4d5f-8d82-a9f238d7ab01.metadata.json |
+|                               | numFiles                                           | 1                                                  |
+|                               | numRows                                            | 600000                                             |
+|                               | owner                                              | spark                                              |
+|                               | previous_metadata_location                         | s3a://warehouse/tablespace/external_tables/my_db.db/customer_data/metadata/00007-8fe0da66-47ea-4383-a716-4da38856a4b9.metadata.json |
+|                               | snapshot-count                                     | 9                                                  |
+|                               | table_type                                         | ICEBERG                                            |
+|                               | totalSize                                          | 38728757                                           |
+|                               | transient_lastDdlTime                              | 1763196640                                         |
+|                               | uuid                                               | 9ca1cef7-d118-4f24-803a-161f5aaa1b68               |
+|                               | write.format.default                               | parquet                                            |
+|                               | write.parquet.compression-codec                    | snappy                                             |
+|                               | NULL                                               | NULL                                               |
+| # Storage Information         | NULL                                               | NULL                                               |
+| SerDe Library:                | org.apache.hadoop.hive.serde2.lazy.LazySimpleSerDe | NULL                                               |
+| InputFormat:                  | org.apache.hadoop.mapred.FileInputFormat           | NULL                                               |
+| OutputFormat:                 | org.apache.hadoop.mapred.FileOutputFormat          | NULL                                               |
+| Compressed:                   | No                                                 | NULL                                               |
+| Num Buckets:                  | 0                                                  | NULL                                               |
+| Bucket Columns:               | []                                                 | NULL                                               |
+| Sort Columns:                 | []                                                 | NULL                                               |
++-------------------------------+----------------------------------------------------+----------------------------------------------------+
+51 rows selected (0.266 seconds)
+
+
+```
+
+<br/><br/>
+
+
 ### Task 03 — Querying with Trino (via Hue):
 
 Use Hue to run SQL queries through Trino for fast, interactive analytics.
