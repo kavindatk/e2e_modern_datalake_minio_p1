@@ -247,6 +247,32 @@ SELECT * FROM iceberg_catalog.my_db.customer_data;
 SELECT count(*) FROM iceberg_catalog.my_db.customer_data;
 
 ```
+<br/>
+#### Useful Iceberg commands for Spark SQL
+
+```sql
+# Check Snapshots
+
+SELECT * FROM iceberg_catalog.my_db.customer_data.snapshots;
+
+# Iceberg metadata snapshots ,history ,files ,manifests
+
+SELECT * FROM iceberg_catalog.my_db.customer_data.history;
+SELECT * FROM iceberg_catalog.my_db.customer_data.files;
+
+# Describer Table
+
+DESCRIBE TABLE iceberg_catalog.my_db.customer_data;
+
+#  Query by snapshot ID or Timestamp
+
+SELECT * FROM iceberg_catalog.my_db.customer_data VERSION AS OF <snapshot id>;
+
+SELECT * FROM iceberg_catalog.my_db.customer_data TIMESTAMP AS OF <timestamp>;
+
+```
+
+<br/><br/>
 
 <br/><br/>
 ### Task 04 — Loading Data into DuckDB:
