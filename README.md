@@ -248,7 +248,40 @@ SELECT count(*) FROM iceberg_catalog.my_db.customer_data;
 
 ```
 <br/>
+
+#### Useful Iceberg commands for Trino
+
+<br/>
+
+```sql
+
+# Snapshots
+SELECT * FROM iceberg.my_db."customer_data$snapshots";
+
+# History
+SELECT * FROM iceberg.my_db."customer_data$history";
+
+# Files
+SELECT * FROM iceberg.my_db."customer_data$files";
+
+#  Query by snapshot ID or Timestamp
+
+SELECT *
+FROM iceberg.my_db.customer_data
+FOR VERSION AS OF 2861418859086358860;
+
+SELECT *
+FROM iceberg.my_db.customer_data
+FOR TIMESTAMP AS OF TIMESTAMP '2025-11-15 08:10:43.270 America/Los_Angeles';
+
+```
+
+
+<br/><br/>
+
+
 #### Useful Iceberg commands for Spark SQL
+
 
 ```sql
 # Check Snapshots
@@ -260,7 +293,7 @@ SELECT * FROM iceberg_catalog.my_db.customer_data.snapshots;
 SELECT * FROM iceberg_catalog.my_db.customer_data.history;
 SELECT * FROM iceberg_catalog.my_db.customer_data.files;
 
-# Describer Table
+# Describe Table
 
 DESCRIBE TABLE iceberg_catalog.my_db.customer_data;
 
@@ -271,8 +304,6 @@ SELECT * FROM iceberg_catalog.my_db.customer_data VERSION AS OF <snapshot id>;
 SELECT * FROM iceberg_catalog.my_db.customer_data TIMESTAMP AS OF <timestamp>;
 
 ```
-
-<br/><br/>
 
 <br/><br/>
 ### Task 04 — Loading Data into DuckDB:
